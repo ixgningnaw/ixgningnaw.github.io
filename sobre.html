@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="refresh">
+    <meta name="author" content="sumbioun.com">
+    <link rel="icon" href="favicon.png" type="image/x-icon"/>
+    <title>Gogoame | Sobre</title>
+    <link rel="stylesheet" type="text/css" href="public/front/css/main.css">
+    <link href='https://fonts.font.im/css?family=Source+Sans+Pro' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <!--
+    ________Author | pedro veneroso
+    ______________ | sumbioun.com
+
+    _______Version | 0.1β
+    __Release date | Oct 24th 2016
+    ___Last update | Jun 8th 2021
+
+    _______License |GPLv3 2016 sumbioun.com
+    -->
+</head>
+<body>
+<script type="text/javascript">
+
+    let motion = document.createElement('img');
+    motion.id = "motion";
+    motion.src = "public/media/sumbioun-motion.gif";
+    motion.style.width = "320px";
+    motion.style.marginLeft = (((window.innerWidth - 320) / 2) - 200) + "px";
+    motion.style.marginTop = ((window.innerHeight - 320) / 2) + "px";
+    document.body.appendChild(motion);
+
+    let motion_button = document.getElementById("motion");
+    mouseOverMotion = function () {
+        motion_button.src = "";
+        motion_button.src = "public/media/sumbioun-motion.gif";
+        motion_button.style.cursor = "pointer";
+    };
+    motion_button.onmouseover = mouseOverMotion;
+
+    let text_left = document.createElement('div');
+    text_left.id = "text_left";
+    text_left.style.position = "absolute";
+    text_left.style.top = "0px";
+    text_left.style.textAlign = "right";
+    text_left.style.width = "40%";
+    text_left.style.height = "50%";
+    text_left.style.marginTop = "20%";
+    text_left.style.marginLeft = "50%";
+    text_left.style.color = "#324e87";
+    text_left.innerHTML = '<p>Gogoame (午後雨), afternoon rain –in japanese –, is a text rain. This net art experiment was developed by Brazilian artist <a href="https://pedroveneroso.com" target="_blank">Pedro Veneroso</a> in October 2016 and, since then, has been visited by more than 300.000 people from over 90 countries that contributed more than 45.000 unique entries to the database.</p><p style="margin-top:40px;margin-bottom:40px"><a href="https://www.patreon.com/bePatron?u=61135980" data-patreon-widget-type="become-patron-button">Become a Patron!</a></p><p style="font-size:12px">You can now own a piece of Gogoame:</p><p style="font-size:12px">Ask for a specific NFT at:<br /><b>sumbiountech@gmail.com</b></p><br />';
+    document.body.appendChild(text_left);
+
+    let home_button = document.createElement('div');
+    home_button.id = 'home_button';
+    home_button.className = 'button';
+    home_button.style.position = "absolute";
+    home_button.style.top = "0px";
+    home_button.style.width = '32px';
+    home_button.style.marginLeft = '0px';
+    home_button.style.marginTop = ((window.innerHeight - 48) / 2) + "px"; //
+    home_button.style.paddingLeft = "14px";
+    home_button.style.paddingRight = "4px";
+    home_button.innerHTML += '<i class="fa fa-umbrella" aria-hidden="true"></i>';
+    document.body.appendChild(home_button);
+
+    makeButton(home_button, 32, ((window.innerHeight - 48) / 2), 0, 136);
+
+    function createTooltip(x_pos, y_pos, this_id) {
+        let tooltip = document.createElement('div');
+        tooltip.id = "tooltip_" + this_id;
+        tooltip.style.position = "absolute";
+        tooltip.style.top = "0px";
+        tooltip.style.marginTop = y_pos + 13 + "px";
+        tooltip.style.marginLeft = x_pos + 24 + "px";
+        tooltip.style.color = "white";
+        tooltip.style.font = "Source Sans Pro";
+        tooltip.style.fontWeight = "400";
+        tooltip.style.textTransform = 'uppercase';
+        tooltip.innerHTML = "GOGOAME";
+        document.body.appendChild(tooltip);
+    }
+
+    function removeTooltip(this_id) {
+        let tooltip = document.getElementById("tooltip_" + this_id);
+        if (tooltip != null) {
+            tooltip.parentNode.removeChild(tooltip);
+        }
+    }
+
+    function makeButton(this_button, x_pos, y_pos, this_id, this_width) {
+        let mouseOver = function () {
+            this_button.style.backgroundColor = "#7fa1d3";
+            this_button.style.width = this_width + "px";
+            this_button.style.cursor = "pointer";
+            if (document.getElementById("tooltip_" + this_id) === null) {
+                createTooltip(x_pos, y_pos, this_id);
+            }
+        };
+        let mouseOut = function () {
+            this_button.style.backgroundColor = "#1d1d1d";
+            this_button.style.width = "32px";
+            this_button.style.cursor = "none";
+            removeTooltip(this_id);
+        };
+        let mouseDown = function () {
+            window.open('index.html', '_self');
+        };
+        this_button.onmouseover = mouseOver;
+        this_button.onmouseout = mouseOut;
+        this_button.onmousedown = mouseDown;
+    }
+
+</script>
+
+</body>
+</html>

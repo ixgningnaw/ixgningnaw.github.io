@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="refresh">
+    <meta name="author" content="sumbioun.com">
+    <link rel="icon" href="favicon.png" type="image/x-icon"/>
+    <title>Gogoame | Chuva de texto</title>
+    <link rel="stylesheet" type="text/css" href="public/front/css/main.css">
+    <link href='https://fonts.font.im/css?family=Source+Sans+Pro' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <script src="public/front/js/Drops.js"></script>
+    <script src="public/front/js/Environment.js"></script>
+    <script src="public/front/js/RainText.js"></script>
+    <script src="public/front/js/DropWords.js"></script>
+    <script src="public/front/js/Gui.js"></script>
+    <script src="public/front/js/Text.js"></script>
+
+    <!-- 
+    _________Title | Gogoame – gogoame.sumbioun.com
+    ________Author | pedro veneroso – pedroveneroso.com
+    ________________ an experiment by Sumbioun Lab – sumbioun.com
+
+    _______Version | 0.2β
+    __Release date | Oct 24th 2016
+    ___Last update | Nov 5th 2016
+
+    _______License | GPLv3 2016 sumbioun.com
+    -->
+</head>
+<body>
+
+<script type="text/javascript">
+
+    $.getJSON("public/front/json/blessing.json", function (result) {
+        mainCode(result)
+    })
+
+    function mainCode(data) {
+
+        let gui = new Gui();
+        let environment = new Environment();
+        let rain_text = [];
+        let input_text = new Text();
+        let make_rain_text = false;
+
+        environment.initializeCanvas();
+
+        let drops = [];
+        for (let i = 0; i < environment.getIntensity(); i++) {
+            drops[i] = new Drops(i, environment.getChars(), environment.getGravity());
+            drops[i].initializeDrop();
+        }
+
+        let current_drop;
+        let drop_word = new Array(5);  // 祝福出现的条数
+        for (let i = 0; i < drop_word.length; i++) {
+            drop_word[i] = new Array(4);
+            drop_word[i][0] = new DropWords();
+            current_drop = Math.floor(Math.random() * data.length);
+            drop_word[i][0].initializeText(data[current_drop]['blessing'], environment.getGravity(), environment.getWind());
+            drop_word[i][1] = Math.floor(Math.random() * (800 - 60 + 1)) + 60; // 计数器最大值
+            drop_word[i][2] = 0; // 计数器
+            drop_word[i][3] = false;
+        }
+
+
+        /* 动画 */
+
+        // 基于鼠标的风力
+
+        document.addEventListener("mousemove", function (e) {
+            environment.updateCurrentWind(e.clientX);
+        });
+
+        // 迭代
+
+        // let the_rain = setInterval(rainTimer, 16.6);
+        setInterval(rainTimer, 16.6);
+
+        let rain_canvas = document.getElementById('rain_processing');
+        let rain_context = rain_canvas.getContext("2d");
+
+        let text = [];
+        let current_text = 0;
+        let total_texts = 0;
+
+        function rainTimer() {
+            // 输入
+            if (gui.checkInput()) {
+                gui.confirmReceive();
+                let analyze_text = gui.getText();
+                text = input_text.processText(analyze_text);
+                for (let a = 0; a < text.length; a++) {
+                    if (text[a].length > 0) {
+                        total_texts++;
+                        rain_text[total_texts - 1] = new RainText();
+                        rain_text[total_texts - 1].initializeText(text[a], environment.getGravity(), environment.getWind());
+                    }
+                }
+            }
+            if (rain_text[current_text] !== undefined) {
+                make_rain_text = true;
+                if (rain_text[current_text].endRainText() === true) {
+                    make_rain_text = false;
+                    current_text++;
+                }
+                // 允许同时使用两个？
+            }
+
+            // 更新数值
+
+            environment.updateCurrentIntensity();
+            rain_context.clearRect(0, 0, rain_canvas.width, rain_canvas.height);
+            rain_context.textAlign = "center";
+            rain_context.textBaseline = 'middle';
+            let current_intensity = environment.getCurrentIntensity();
+            let current_wind = environment.getWind();
+
+            // 设计
+
+            for (let z = 0; z < drop_word.length; z++) {
+                if (drop_word[z][2] < drop_word[z][1]) {
+                    drop_word[z][2]++;
+                } else {
+                    drop_word[z][0].updateText();
+                    let in_text = drop_word[z][0].getText();
+                    let echo = drop_word[z][0].echoLine();
+                    for (let i = 0; i < in_text.length; i++) {
+                        if (echo[i] != null) {
+                            let offset_x = 0;
+                            let offset_y = in_text[i][3] / 2 + 10;
+
+                            rain_context.beginPath();
+                            rain_context.moveTo(in_text[i][0] + offset_x, in_text[i][1] - offset_y);
+                            rain_context.lineTo(echo[i][0] + offset_x, echo[i][1] - offset_y);
+                            rain_context.strokeStyle = "#7fa1d3";
+                            rain_context.stroke();
+                        }
+
+                        rain_context.fillStyle = "black";   //"#7fa1d3";//
+                        rain_context.font = in_text[i][3] + "pt Source Sans Pro";
+                        rain_context.fillText(in_text[i][2], in_text[i][0], in_text[i][1]);
+                    }
+                }
+                if (drop_word[z][0].endRainText()) {
+                    drop_word[z] = new Array(4);
+                    drop_word[z][0] = new DropWords();
+                    current_drop = Math.floor(Math.random() * (data.length - 1 + 1)) + 1;
+                    drop_word[z][0].initializeText(data[current_drop]['blessing'], environment.getGravity(), environment.getWind());
+                    drop_word[z][1] = Math.floor(Math.random() * (800 - 60 + 1)) + 60; // 计数器最大值
+                    drop_word[z][2] = 0; // 计数器
+                    drop_word[z][3] = false;
+                }
+            }
+
+
+            // --- 下降
+            for (let i = 0; i < environment.getCurrentIntensity(); i++) {
+                drops[i].updateDrop(current_intensity, current_wind);
+
+                let offset_x = 0;
+                let offset_y = drops[i].getSize() / 2;
+
+                // let echo = drops[i].echoLine();
+                rain_context.beginPath();
+                rain_context.moveTo(drops[i].getX() + offset_x, drops[i].getY() - offset_y);
+                // rain_context.lineTo(echo[0] + offset_x, echo[1] - offset_y);    // Environment 中 drop_chars 下落的拖尾
+                rain_context.strokeStyle = "#7FA1D3";
+                rain_context.stroke();
+
+                let temp_color = (200 + (8 * 11)) - (drops[i].getSize() * 11); // 灰色
+                rain_context.fillStyle = "rgba(" + temp_color + "," + temp_color + "," + temp_color + ",1)"; // 灰色
+
+                rain_context.font = drops[i].getSize() + "px Source Sans Pro";
+                rain_context.fillText(drops[i].getChar(), drops[i].getX(), drops[i].getY());
+            }
+
+
+            // --- 文本
+            if (make_rain_text === true) {
+
+                rain_text[current_text].updateText();
+                let in_text = rain_text[current_text].getText();
+                let echo = rain_text[current_text].echoLine();
+                for (let i = 0; i < in_text.length; i++) {
+                    if (echo[i] != null) {
+                        let offset_x = 0;
+                        let offset_y = in_text[i][3] / 2 + 10;
+
+                        rain_context.beginPath();
+                        rain_context.moveTo(in_text[i][0] + offset_x, in_text[i][1] - offset_y);
+                        rain_context.lineTo(echo[i][0] + offset_x, echo[i][1] - offset_y);
+                        rain_context.strokeStyle = "#7fa1d3";
+                        rain_context.stroke();
+                    }
+
+                    rain_context.fillStyle = "black";
+                    rain_context.font = "bold " + in_text[i][3] + "pt Source Sans Pro";
+                    rain_context.fillText(in_text[i][2], in_text[i][0], in_text[i][1]);
+                }
+            }
+
+        }
+
+        /* 控制面板 */
+
+        gui.controlPanel();
+
+    } // end function mainCode
+
+</script>
+
+</body>
+</html>
